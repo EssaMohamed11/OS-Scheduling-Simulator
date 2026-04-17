@@ -1,0 +1,15 @@
+{
+  "name": "os-project",
+  "version": "0.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "server": "nodemon app.js"
+  },
+  "author": "Youssef",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
