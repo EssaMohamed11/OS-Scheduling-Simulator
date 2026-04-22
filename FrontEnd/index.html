@@ -1,199 +1,532 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPU-Scheduling</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <script>
-        tailwind.config = {
-            content: [],
-            theme: { extend: {} }
-        }
-    </script>
-</head>
-<body class="bg-gray-50 font-sans">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CPU-Scheduling Simulator</title>
 
-<div class="max-w-7xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden min-h-screen">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="style.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+            rel="stylesheet" />
 
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-emerald-600 to-blue-700 text-white px-8 py-5 flex items-center justify-between">
-        <h1 class="text-3xl font-bold">CPU-Scheduling</h1>
-    </div>
-
-    <!-- Definition -->
-    <div class="px-8 pt-6">
-        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
-            <p class="text-blue-800 font-medium">Definition (Please input your data here.)</p>
-        </div>
-
-        <!-- Time Quantum -->
-        <div class="flex items-center gap-3 mb-8">
-            <label class="font-semibold text-gray-700">TIME QUANTUM</label>
-            <input id="time-quantum" type="number" value="2" 
-                   class="w-24 px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 text-center text-lg">
-        </div>
-
-        <!-- Processes Table -->
-        <table class="w-full mb-8">
-            <thead>
-                <tr class="border-b-2 border-gray-300">
-                    <th class="text-left py-4 px-6 font-semibold text-gray-700">Process name</th>
-                    <th class="text-left py-4 px-6 font-semibold text-gray-700">Arrival</th>
-                    <th class="text-left py-4 px-6 font-semibold text-gray-700">CPU burst</th>
-                    <th class="w-16"></th>
-                </tr>
-            </thead>
-            <tbody id="processes-tbody" class="text-gray-700"></tbody>
-        </table>
-
-        <div class="flex justify-between items-center">
-            <button id="add-process-btn"
-                    class="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-7 py-4 rounded-2xl font-semibold text-lg transition shadow-md">
-                <i class="fas fa-plus"></i>
-                ADD A NEW PROCESS
-            </button>
-            
-            <button id="run-simulation-btn"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition shadow-md">
-                RUN SIMULATION
-            </button>
-        </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="px-8 mt-10 border-t border-gray-200">
-        <div class="flex border-b">
-            <button class="tab-button active px-10 py-5 font-semibold text-lg" data-tab="rr">ROUND ROBIN</button>
-            <button class="tab-button px-10 py-5 font-semibold text-lg text-gray-600" data-tab="srtf">SRTF COMPARISON</button>
-        </div>
-    </div>
-
-    <!-- Simulation Area -->
-    <div class="px-8 py-8" id="simulation-area">
-
-        <!-- Round Robin -->
-        <div id="rr-section" class="tab-content">
-            <h3 class="text-xl font-semibold mb-4 text-blue-600">GANTT CHART: ROUND ROBIN SIMULATION</h3>
-            <div id="gantt-rr" 
-                class="gantt-container h-36 rounded-3xl p-4 shadow-inner overflow-hidden flex items-center bg-gray-50 border border-blue-100">
-            </div>
-            <div class="flex justify-between text-xs text-gray-400 mt-3 px-2">
-                <span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>70</span>
+        <script>
+            tailwind.config = {
+                content: [],
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Inter", "system-ui", "sans-serif"],
+                            mono: ["JetBrains Mono", "monospace"],
+                        },
+                    },
+                },
+            };
+        </script>
+    </head>
+    <body class="bg-gray-50 font-sans">
+        <div
+            class="max-w-7xl mx-auto bg-white shadow-2xl rounded-3xl overflow-hidden min-h-screen">
+            <!-- Header -->
+            <div
+                class="bg-gradient-to-r from-emerald-600 to-blue-700 text-white px-8 py-5 flex items-center justify-between">
+                <h1 class="text-3xl font-bold">CPU-Scheduling</h1>
             </div>
 
-            <div class="mt-10">
-                <h3 class="text-lg font-semibold mb-4 text-blue-600">Detailed Results (Round Robin)</h3>
-                <table class="w-full border-collapse bg-white shadow-md rounded-2xl overflow-hidden">
+            <!-- Definition -->
+            <div class="px-8 pt-6">
+                <div
+                    class="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
+                    <p class="text-blue-800 font-medium">
+                        Definition (Please input your data here.)
+                    </p>
+                </div>
+
+                <!-- Time Quantum -->
+                <div class="flex items-center gap-3 mb-8">
+                    <label class="font-semibold text-gray-700"
+                        >TIME QUANTUM</label
+                    >
+                    <input
+                        id="time-quantum"
+                        type="number"
+                        value="2"
+                        class="w-24 px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:border-blue-500 text-center text-lg" />
+                </div>
+
+                <!-- Processes Table -->
+                <table class="w-full mb-8">
                     <thead>
-                        <tr class="bg-blue-600 text-white">
-                            <th class="py-4 px-6 text-center">Process Name</th>
-                            <th class="py-4 px-6 text-center">Arrival</th>
-                            <th class="py-4 px-6 text-center">Burst</th>
-                            <th class="py-4 px-6 text-center">WT (RR)</th>
-                            <th class="py-4 px-6 text-center">TAT (RR)</th>
-                            <th class="py-4 px-6 text-center">RT (RR)</th>
+                        <tr class="border-b-2 border-gray-300">
+                            <th
+                                class="text-left py-4 px-6 font-semibold text-gray-700">
+                                Process name
+                            </th>
+                            <th
+                                class="text-left py-4 px-6 font-semibold text-gray-700">
+                                Arrival
+                            </th>
+                            <th
+                                class="text-left py-4 px-6 font-semibold text-gray-700">
+                                CPU burst
+                            </th>
+                            <th class="w-16"></th>
                         </tr>
                     </thead>
-                    <tbody id="rr-table-body" class="text-blue-700 text-sm"></tbody>
+                    <tbody id="processes-tbody" class="text-gray-700"></tbody>
                 </table>
-            </div>
-        </div>
 
-        <!-- SRTF -->
-        <div id="srtf-section" class="tab-content hidden">
-            <h3 class="text-xl font-semibold mb-4 text-orange-600">GANTT CHART: SRTF SIMULATION</h3>
-            <div id="gantt-srtf" 
-                class="gantt-container h-36 rounded-3xl p-4 shadow-inner overflow-hidden flex items-center bg-gray-50 border border-orange-100">
-            </div>
-            <div class="flex justify-between text-xs text-gray-400 mt-3 px-2">
-                <span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>70</span>
-            </div>
+                <div class="flex justify-between items-center">
+                    <button
+                        id="add-process-btn"
+                        class="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-7 py-4 rounded-2xl font-semibold text-lg transition shadow-md">
+                        <i class="fas fa-plus"></i>
+                        ADD A NEW PROCESS
+                    </button>
 
-            <div class="mt-10">
-                <h3 class="text-lg font-semibold mb-4 text-orange-600">Detailed Simulation Results (SRTF)</h3>
-                <table class="w-full border-collapse bg-white shadow-md rounded-2xl overflow-hidden">
-                    <thead>
-                        <tr class="bg-orange-500 text-white">
-                            <th class="py-4 px-6 text-center">Process Name</th>
-                            <th class="py-4 px-6 text-center">Arrival</th>
-                            <th class="py-4 px-6 text-center">Burst</th>
-                            <th class="py-4 px-6 text-center">WT (SRTF)</th>
-                            <th class="py-4 px-6 text-center">TAT (SRTF)</th>
-                            <th class="py-4 px-6 text-center">RT (SRTF)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="srtf-table-body" class="text-orange-700 text-sm"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Performance Summary -->
-    <div class="px-8 pb-12">
-        <h4 class="font-semibold mb-6 text-lg">Performance Comparison Summary</h4>
-        <div class="grid grid-cols-3 gap-6">
-            <div class="bg-white border rounded-3xl p-8 text-center">
-                <p class="text-gray-500 text-sm mb-2">AVG WAITING TIME</p>
-                <div id="avg-waiting" class="text-4xl font-bold text-gray-400">--</div>
-            </div>
-            <div class="bg-white border rounded-3xl p-8 text-center">
-                <p class="text-gray-500 text-sm mb-2">AVG TURNAROUND TIME</p>
-                <div id="avg-turnaround" class="text-4xl font-bold text-gray-400">--</div>
-            </div>
-            <div class="bg-white border rounded-3xl p-8 text-center">
-                <p class="text-gray-500 text-sm mb-2">AVG RUN TIME</p>
-                <div id="avg-runtime" class="text-4xl font-bold text-gray-400">--</div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<!-- Add Process Modal -->
-<div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-3xl w-full max-w-lg mx-4 shadow-2xl">
-        <div class="p-8">
-            <h3 class="text-2xl font-bold mb-6">Add New Process</h3>
-            
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Process Name</label>
-                    <input id="modal-process-name" type="text" readonly 
-                           class="w-full px-6 py-4 bg-gray-100 border border-gray-300 rounded-2xl text-lg font-medium">
-                </div>
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">Arrival Time</label>
-                        <input id="modal-arrival" type="number" value="0" 
-                               class="w-full px-6 py-4 border border-gray-300 rounded-2xl text-lg">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-600 mb-2">CPU Burst</label>
-                        <input id="modal-burst" type="number" value="0" 
-                               class="w-full px-6 py-4 border border-gray-300 rounded-2xl text-lg">
-                    </div>
+                    <button
+                        id="run-simulation-btn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition shadow-md">
+                        RUN SIMULATION
+                    </button>
                 </div>
             </div>
-        </div>
-        
-        <div class="border-t flex">
-            <button id="modal-cancel-btn"
-                    class="flex-1 py-6 text-lg font-semibold text-gray-600 hover:bg-gray-100 rounded-bl-3xl">
-                Cancel
-            </button>
-            <button id="modal-add-btn"
-                    class="flex-1 py-6 text-lg font-semibold text-blue-600 hover:bg-blue-50 rounded-br-3xl">
-                Add Process
-            </button>
-        </div>
-    </div>
-</div>
 
-<script type="module" src="script.js"></script>
-</body>
+            <!-- Tabs -->
+            <div class="px-8 mt-10 border-t border-gray-200">
+                <div class="flex border-b">
+                    <button
+                        class="tab-button active px-10 py-5 font-semibold text-lg"
+                        data-tab="rr">
+                        ROUND ROBIN
+                    </button>
+                    <button
+                        class="tab-button px-10 py-5 font-semibold text-lg text-gray-600"
+                        data-tab="srtf">
+                        SRTF COMPARISON
+                    </button>
+                </div>
+            </div>
+
+            <!-- Simulation Area -->
+            <div class="px-8 py-8" id="simulation-area">
+                <!-- ============ Round Robin ============ -->
+                <div id="rr-section" class="tab-content">
+                    <div class="gantt-section" id="gantt-rr-section">
+                        <!-- Gantt Header with Controls -->
+                        <div class="gantt-header">
+                            <div class="gantt-title blue">
+                                ROUND ROBIN — GANTT CHART
+                            </div>
+                            <div
+                                class="gantt-controls"
+                                id="rr-controls"
+                                style="display: none">
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="reset"
+                                    data-target="rr"
+                                    title="Reset">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="step-back"
+                                    data-target="rr"
+                                    title="Step Back">
+                                    <i class="fas fa-step-backward"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn play-btn"
+                                    data-action="play"
+                                    data-target="rr"
+                                    title="Play / Pause">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="step-fwd"
+                                    data-target="rr"
+                                    title="Step Forward">
+                                    <i class="fas fa-step-forward"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="end"
+                                    data-target="rr"
+                                    title="Jump to End">
+                                    <i class="fas fa-forward"></i>
+                                </button>
+                                <div class="speed-control">
+                                    <button
+                                        class="speed-btn"
+                                        data-action="speed-down"
+                                        data-target="rr">
+                                        −
+                                    </button>
+                                    <span
+                                        class="speed-label"
+                                        id="rr-speed-label"
+                                        >1×</span
+                                    >
+                                    <button
+                                        class="speed-btn"
+                                        data-action="speed-up"
+                                        data-target="rr">
+                                        +
+                                    </button>
+                                </div>
+                                <div class="time-display" id="rr-time-display">
+                                    t = <span>0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="gantt-timeline" id="gantt-rr-timeline">
+                            <div class="gantt-placeholder">
+                                <i class="fas fa-chart-gantt"></i>
+                                <span
+                                    >Run simulation to see the Gantt chart</span
+                                >
+                            </div>
+                        </div>
+
+                        <!-- Legend -->
+                        <div class="gantt-legend" id="gantt-rr-legend"></div>
+                    </div>
+
+                    <div class="mt-10">
+                        <h3 class="text-lg font-semibold mb-4 text-blue-600">
+                            Detailed Results (Round Robin)
+                        </h3>
+                        <table
+                            class="w-full border-collapse bg-white shadow-md rounded-2xl overflow-hidden">
+                            <thead>
+                                <tr class="bg-blue-600 text-white">
+                                    <th class="py-4 px-6 text-center">
+                                        Process Name
+                                    </th>
+                                    <th class="py-4 px-6 text-center">
+                                        Arrival
+                                    </th>
+                                    <th class="py-4 px-6 text-center">Burst</th>
+                                    <th class="py-4 px-6 text-center">
+                                        WT (RR)
+                                    </th>
+                                    <th class="py-4 px-6 text-center">
+                                        TAT (RR)
+                                    </th>
+                                    <th class="py-4 px-6 text-center">
+                                        RT (RR)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody
+                                id="rr-table-body"
+                                class="text-blue-700 text-sm"></tbody>
+                            <tfoot
+                                id="rr-table-foot"
+                                class="bg-blue-50 text-blue-900 font-bold hidden border-t-2 border-blue-200">
+                                <tr>
+                                    <td
+                                        colspan="3"
+                                        class="py-4 px-6 text-right uppercase tracking-wider text-xs">
+                                        Averages:
+                                    </td>
+                                    <td
+                                        class="py-4 px-6 text-center"
+                                        id="rr-table-avg-wt">
+                                        --
+                                    </td>
+                                    <td
+                                        class="py-4 px-6 text-center"
+                                        id="rr-table-avg-tat">
+                                        --
+                                    </td>
+                                    <td
+                                        class="py-4 px-6 text-center"
+                                        id="rr-table-avg-rt">
+                                        --
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SRTF -->
+                <div id="srtf-section" class="tab-content hidden">
+                    <div class="gantt-section" id="gantt-srtf-section">
+                        <div class="gantt-header">
+                            <div class="gantt-title orange">
+                                SRTF — GANTT CHART
+                            </div>
+                            <div
+                                class="gantt-controls"
+                                id="srtf-controls"
+                                style="display: none">
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="reset"
+                                    data-target="srtf"
+                                    title="Reset">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="step-back"
+                                    data-target="srtf"
+                                    title="Step Back">
+                                    <i class="fas fa-step-backward"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn play-btn orange-theme"
+                                    data-action="play"
+                                    data-target="srtf"
+                                    title="Play / Pause">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="step-fwd"
+                                    data-target="srtf"
+                                    title="Step Forward">
+                                    <i class="fas fa-step-forward"></i>
+                                </button>
+                                <button
+                                    class="gantt-ctrl-btn"
+                                    data-action="end"
+                                    data-target="srtf"
+                                    title="Jump to End">
+                                    <i class="fas fa-forward"></i>
+                                </button>
+                                <div class="speed-control">
+                                    <button
+                                        class="speed-btn"
+                                        data-action="speed-down"
+                                        data-target="srtf">
+                                        −
+                                    </button>
+                                    <span
+                                        class="speed-label"
+                                        id="srtf-speed-label"
+                                        >1×</span
+                                    >
+                                    <button
+                                        class="speed-btn"
+                                        data-action="speed-up"
+                                        data-target="srtf">
+                                        +
+                                    </button>
+                                </div>
+                                <div
+                                    class="time-display"
+                                    id="srtf-time-display">
+                                    t=<span>0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gantt-timeline" id="gantt-srtf-timeline">
+                            <div class="gantt-placeholder">
+                                <i class="fas fa-chart-gantt"></i>
+                                <span
+                                    >Run simulation to see the Gantt chart</span
+                                >
+                            </div>
+                        </div>
+                        <div class="gantt-legend" id="gantt-srtf-legend"></div>
+                    </div>
+
+                    <div class="mt-10">
+                        <h3 class="text-lg font-semibold mb-4 text-orange-600">
+                            Detailed Results (SRTF)
+                        </h3>
+                        <table
+                            class="w-full border-collapse bg-white shadow-md rounded-2xl overflow-hidden">
+                            <thead>
+                                <tr class="bg-orange-500 text-white">
+                                    <th class="py-4 px-6 text-center">
+                                        Process Name
+                                    </th>
+                                    <th class="py-4 px-6 text-center">
+                                        Arrival
+                                    </th>
+                                    <th class="py-4 px-6 text-center">Burst</th>
+                                    <th class="py-4 px-6 text-center">
+                                        WT (SRTF)
+                                    </th>
+                                    <th class="py-4 px-6 text-center">
+                                        TAT (SRTF)
+                                    </th>
+                                    <th class="py-4 px-6 text-center">
+                                        RT (SRTF)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody
+                                id="srtf-table-body"
+                                class="text-orange-700 text-sm"></tbody>
+                            <tfoot
+                                id="srtf-table-foot"
+                                class="bg-orange-50 text-orange-900 font-bold hidden border-t-2 border-orange-200">
+                                <tr>
+                                    <td
+                                        colspan="3"
+                                        class="py-4 px-6 text-right uppercase tracking-wider text-xs">
+                                        Averages:
+                                    </td>
+                                    <td
+                                        class="py-4 px-6 text-center"
+                                        id="srtf-table-avg-wt">
+                                        --
+                                    </td>
+                                    <td
+                                        class="py-4 px-6 text-center"
+                                        id="srtf-table-avg-tat">
+                                        --
+                                    </td>
+                                    <td
+                                        class="py-4 px-6 text-center"
+                                        id="srtf-table-avg-rt">
+                                        --
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Summary -->
+            <div class="px-8 pb-12">
+                <h4 class="font-semibold mb-6 text-lg">
+                    Performance Comparison Summary
+                </h4>
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="bg-white border rounded-3xl p-8 text-center">
+                        <p
+                            class="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
+                            Avg Waiting Time
+                        </p>
+                        <div
+                            id="perf-wt-compare"
+                            class="flex justify-center items-center font-bold text-4xl">
+                            <span class="text-gray-300"
+                                >--
+                                <span class="text-2xl mx-2 font-medium"
+                                    >vs</span
+                                >
+                                --</span
+                            >
+                        </div>
+                    </div>
+                    <div class="bg-white border rounded-3xl p-8 text-center">
+                        <p
+                            class="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
+                            Avg Turnaround Time
+                        </p>
+                        <div
+                            id="perf-tat-compare"
+                            class="flex justify-center items-center font-bold text-4xl">
+                            <span class="text-gray-300"
+                                >--
+                                <span class="text-2xl mx-2 font-medium"
+                                    >vs</span
+                                >
+                                --</span
+                            >
+                        </div>
+                    </div>
+                    <div class="bg-white border rounded-3xl p-8 text-center">
+                        <p
+                            class="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">
+                            Avg Response Time
+                        </p>
+                        <div
+                            id="perf-rt-compare"
+                            class="flex justify-center items-center font-bold text-4xl">
+                            <span class="text-gray-300"
+                                >--
+                                <span class="text-2xl mx-2 font-medium"
+                                    >vs</span
+                                >
+                                --</span
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Process Modal -->
+        <div
+            id="add-modal"
+            class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+            <div class="bg-white rounded-3xl w-full max-w-lg mx-4 shadow-2xl">
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold mb-6">Add New Process</h3>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-600 mb-2"
+                                >Process Name</label
+                            >
+                            <input
+                                id="modal-process-name"
+                                type="text"
+                                readonly
+                                class="w-full px-6 py-4 bg-gray-100 border border-gray-300 rounded-2xl text-lg font-medium" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <label
+                                    class="block text-sm font-medium text-gray-600 mb-2"
+                                    >Arrival Time</label
+                                >
+                                <input
+                                    id="modal-arrival"
+                                    type="number"
+                                    value="0"
+                                    class="w-full px-6 py-4 border border-gray-300 rounded-2xl text-lg" />
+                            </div>
+                            <div>
+                                <label
+                                    class="block text-sm font-medium text-gray-600 mb-2"
+                                    >CPU Burst</label
+                                >
+                                <input
+                                    id="modal-burst"
+                                    type="number"
+                                    value="0"
+                                    class="w-full px-6 py-4 border border-gray-300 rounded-2xl text-lg" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t flex">
+                    <button
+                        id="modal-cancel-btn"
+                        class="flex-1 py-6 text-lg font-semibold text-gray-600 hover:bg-gray-100 rounded-bl-3xl">
+                        Cancel
+                    </button>
+                    <button
+                        id="modal-add-btn"
+                        class="flex-1 py-6 text-lg font-semibold text-blue-600 hover:bg-blue-50 rounded-br-3xl">
+                        Add Process
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script type="module" src="script.js"></script>
+    </body>
 </html>

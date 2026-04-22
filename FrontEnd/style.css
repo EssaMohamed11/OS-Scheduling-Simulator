@@ -1,33 +1,602 @@
-.gantt-container {
-    border: 3px solid #374151;
-    background: #1f2937;
+/* ====================== Google Fonts ====================== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
+/* ====================== Gantt Chart Section ====================== */
+
+.gantt-section {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 28px;
+    position: relative;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Header inside gantt section */
+.gantt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.gantt-title {
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #475569;
+}
+
+.gantt-title.blue {
+    color: #2563eb;
+}
+.gantt-title.orange {
+    color: #ea580c;
+}
+
+/* ====================== Playback Controls ====================== */
+
+.gantt-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #0f172a;
+    padding: 6px 10px;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.gantt-ctrl-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 13px;
+}
+
+.gantt-ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+}
+
+.gantt-ctrl-btn:active {
+    transform: scale(0.92);
+}
+
+.gantt-ctrl-btn.play-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.4);
+    margin: 0 2px;
+}
+
+.gantt-ctrl-btn.play-btn:hover {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    box-shadow: 0 3px 14px rgba(99, 102, 241, 0.55);
+    color: white;
+}
+
+.gantt-ctrl-btn.play-btn.orange-theme {
+    background: linear-gradient(135deg, #f97316, #ef4444);
+    box-shadow: 0 2px 10px rgba(249, 115, 22, 0.4);
+}
+
+.gantt-ctrl-btn.play-btn.orange-theme:hover {
+    background: linear-gradient(135deg, #fb923c, #f87171);
+    box-shadow: 0 3px 14px rgba(249, 115, 22, 0.55);
+}
+
+/* Divider inside controls */
+.ctrl-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 4px;
+}
+
+/* Speed control */
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.speed-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    min-width: 30px;
+    text-align: center;
+}
+
+.speed-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+}
+
+.speed-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #e2e8f0;
+}
+
+/* Time display */
+.time-display {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    margin-left: 4px;
+    white-space: nowrap;
+}
+
+.time-display span {
+    color: #e2e8f0;
+}
+
+/* ====================== Gantt Chart Grid (Row-based) ====================== */
+
+.gantt-chart-area {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fafbfc;
+    width: 100%;
+}
+
+/* Custom scrollbar */
+.gantt-chart-area::-webkit-scrollbar {
+    height: 6px;
+}
+.gantt-chart-area::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.gantt-chart-area::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.gantt-chart-area::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.gantt-chart-inner {
+    display: flex;
+    min-width: fit-content;
+}
+
+/* Left labels column */
+.gantt-labels {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #f8fafc;
+    border-right: 2px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.gantt-label-header {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-family: "Inter", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #94a3b8;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.gantt-label-row {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    border-bottom: 1px solid #f1f5f9;
+    white-space: nowrap;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.gantt-label-row:last-child {
+    border-bottom: none;
+}
+
+.gantt-label-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+/* Right chart body */
+.gantt-body {
+    flex: 1;
     position: relative;
 }
 
-.process-bar {
-    height: 100%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 15px;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
-    border-right: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s;
-    min-width: 40px;
+/* Time axis header */
+.gantt-time-header {
+    height: 34px;
+    position: relative;
+    background: #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
 }
 
-.process-bar:hover {
-    filter: brightness(1.15);
+.gantt-time-label {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: #94a3b8;
+    border-left: 1px solid #e2e8f0;
+    box-sizing: border-box;
 }
+
+.gantt-time-label:first-child {
+    border-left: none;
+}
+
+/* Rows area */
+.gantt-rows {
+    position: relative;
+}
+
+.gantt-row {
+    height: 44px;
+    position: relative;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.gantt-row:last-child {
+    border-bottom: none;
+}
+
+/* Alternating row backgrounds */
+.gantt-row:nth-child(even) {
+    background: rgba(241, 245, 249, 0.5);
+}
+
+/* Vertical grid lines in the body */
+.gantt-vline {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #e9edf2;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Per-process lifespan: outer track (faint) + inner fill (grows with playhead) */
+.process-lifespan-line {
+    position: absolute;
+    top: 50%;
+    height: 2px;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    /* Faint track showing the full extent */
+    background: transparent;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.lifespan-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    opacity: 0.45;
+    transition: none; /* JS drives it each RAF frame */
+}
+
+/* Individual block in a row — shell (outline) */
+.gantt-block {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent; /* label hidden until filled */
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    z-index: 3;
+    overflow: hidden;
+    /* Shell border — uses the block's background-color via opacity */
+    opacity: 0; /* hidden before playhead arrives */
+    background-color: transparent !important;
+    box-sizing: border-box;
+    transition: opacity 0.15s ease;
+}
+
+/* Block becomes a visible shell when playhead reaches its start */
+.gantt-block.visible {
+    opacity: 1;
+    /* border color set via inline style on .block-fill parent */
+}
+
+/* The fill bar that grows left→right with the playhead */
+.block-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0%; /* updated by JS each RAF frame */
+    border-radius: 3px;
+    /* background-color set inline to match the process color */
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    transition: none; /* no CSS transition — JS drives it */
+}
+
+/* Glossy top sheen on the fill */
+.block-fill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0) 55%
+    );
+    pointer-events: none;
+}
+
+/* Process label inside the fill */
+.block-label {
+    position: relative;
+    z-index: 2;
+    color: white;
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.2px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    padding: 0 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0; /* fade in once fill is wide enough */
+    transition: opacity 0.2s ease;
+}
+
+.block-fill.wide .block-label {
+    opacity: 1;
+}
+
+/* Active execution glow on the right edge of the fill */
+.gantt-block.current .block-fill::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.5);
+    border-radius: 0 3px 3px 0;
+}
+
+.gantt-block:hover {
+    filter: brightness(1.08);
+    z-index: 10;
+}
+
+/* Tooltip */
+.gantt-block .block-tip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+    padding: 5px 10px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.15s ease;
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    font-family: "JetBrains Mono", monospace;
+}
+
+.gantt-block .block-tip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #1e293b;
+}
+
+.gantt-block:hover .block-tip {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+/* Playhead */
+.gantt-playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ef4444;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.gantt-playhead::before {
+    content: "";
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #ef4444;
+}
+
+.gantt-playhead-header {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 34px;
+    background: #ef4444;
+    z-index: 8;
+    pointer-events: none;
+}
+
+/* ====================== Legend ====================== */
+
+.gantt-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.gantt-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    transition: color 0.2s;
+}
+
+.gantt-legend-item:hover {
+    color: #1e293b;
+}
+
+.gantt-legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* ====================== Placeholder ====================== */
+
+.gantt-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    color: #cbd5e1;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    gap: 10px;
+}
+
+.gantt-placeholder i {
+    font-size: 32px;
+    opacity: 0.5;
+}
+
+/* ====================== Tab Styles ====================== */
 
 .tab-button {
     transition: all 0.3s ease;
+    position: relative;
+    font-family: "Inter", sans-serif;
 }
 
 .tab-button.active {
     color: #2563eb;
     border-bottom: 4px solid #2563eb;
+}
+
+.tab-button:hover:not(.active) {
+    color: #475569;
+    background: rgba(37, 99, 235, 0.04);
+}
+
+/* ====================== Performance Summary Cards ====================== */
+
+.perf-card {
+    position: relative;
+    overflow: hidden;
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.perf-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.perf-card .rr-val,
+.perf-card .srtf-val {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.perf-card .rr-val {
+    color: #3b82f6;
+}
+.perf-card .srtf-val {
+    color: #f97316;
 }
